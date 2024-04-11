@@ -49,8 +49,8 @@ class DynamicGraph:
             #
             # # abs(self.__generator("gaussian", self.i * 0.035)) + self.__generator("uniform") * 5 + i
 
-            self.x.append(self.x[-1] + 0.5)
-            self.y.append(self.y[-1] + ((random.gauss(0, (self.y[-1]) * 0.035)) + random.uniform(0.0, 1)))
+            self.x.append(self.x[-1] + 1)
+            self.y.append(random.uniform(self.y[-1] -10, self.y[-1] + 10) + random.gauss(0, self.y[-1] * 0.035))
 
             self.x.pop(0)
             self.y.pop(0)
