@@ -26,6 +26,7 @@ class DynamicGraph:
         self.done = False
         self.pack_all()
         self.thread = None
+        tkinter.mainloop()
 
     def plot_graph(self):
         self.plot.plot(self.x, self.y, "b")
@@ -75,4 +76,3 @@ class DynamicGraph:
 
 
 graph = DynamicGraph()
-tkinter.mainloop()
