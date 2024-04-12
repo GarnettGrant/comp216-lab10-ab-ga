@@ -35,7 +35,6 @@ class DynamicGraph:
         self.canvas.draw()
     def update_plot(self):
         while not self.done:
-            print(self.y)
 
             self.x.append(self.x[-1] + 1)
 
