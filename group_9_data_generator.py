@@ -20,7 +20,7 @@ class DataGenerator:
     plot: public method which handles the plotting of the graph
     '''
 
-    def __init__(self, xmin, xmax, n, method='Uniform'):
+    def __init__(self, xmin, xmax, n):
 
         ## Lower Boundary
         '''
@@ -39,12 +39,12 @@ class DataGenerator:
         '''
         This generator gives you a uniform random number in a 0-1 range
         Using the Method defined by the user. Default is Uniform in Range 0-1
-        arg: Upper Boundary(When Methodis : Uniform/Constant) or Delta(When Method is: Gaussian)
+        arg: Upper Boundary(When Methodis : Uniform/Constant/'next_value')
+             or Delta(When Method is: Gaussian)
         '''
         if str(method).lower() == 'uniform':
             return random.uniform(0.0, arg)
         elif str(method).lower() == 'constant':
-            # return [i / self.n for i in range(self.n)]
             return [pow(i / self.n, 2) for i in range(self.n)]
         elif str(method).lower() == 'gaussian':
             return random.gauss(0.0, arg)
@@ -57,44 +57,35 @@ class DataGenerator:
         '''
         This method will transform the random value to fit the desired range
         Returns the transformed value (y) and the original value (x)
+
+
         '''
-        # User-defined preferred range [xmax - xmin]
+
+        # m: User-defined preferred range [xmax - xmin]
         m = (self.xmax - self.xmin)
-
-        # C is the minimum value, adding it shifts the graph up by C
+        # c: is the minimum value, adding it shifts the graph up by C
         c = self.xmin
-
-        # list_x is the returned value (output of the method _generator() when using the parameter("constant"))
-        list_x = self.__generator("constant")  # returns a list of normalized values between 0 and 1
-        # print(f"x: {list_x}")
+        # list_x: list of normalized values between 0 and 1, squared
+        list_x = self.__generator("constant")  # returns a squared list of normalized values between 0 and 1
 
         # y = mx + c, the required linear transformation
-        y = [(m * x) + c for x in list_x]
+        y = [(m * x) + c for x in list_x] #
         return y
 
     def plot(self):
         '''
-        This method will add noise to the transformed data, and then plot it to a graph.
-        Nuber of Values to plot is specified by self.n
+        This method will add noise to the transformed data, and then return the values needed to plot a graph.
+
+        variables:
+        transformed_y: list of y values transformed from a range of 0 - 1, transformed to range (x-min, x-max)
+        x: list of x values used for plotting, determines the numbers (years) on the x-axis
+        y: list of y values used for plotting, determines the height of the point
         '''
 
-        y = []
-        x = []
-        transformed_y = self.transformer  # list of y values transformed from a range of 0 - 1, transformed to range
-        # (x-min, x-max)
+        transformed_y = self.transformer
 
-        y = [abs(self.__generator("gaussian", i * 0.035)) + self.__generator("uniform") * 5 + i for i in
-             transformed_y]  # y used for plotting
-        x = [i * 135.0 / self.n + 1880 for i in
-             range(self.n)]  # x used for plotting, determines the numbers on the x axis
-        #
-        # plt.figure("Water Levels Figure", figsize=(12, 4))
-        # plt.plot(x, y, 'r')
-        # plt.bar(x, y, 100 / self.n)
-        # # plt.plot(x, y, 'r.')
-        # # plt.fill_between(x, y)
-        # plt.xlabel('Time, in years')
-        # plt.ylabel('Rise in global sea levels, in millimeters')
-        # plt.title('Global rise in sea levels since 1880')
-        # plt.show()
+        y = [abs(self.__generator("gaussian", i * 0.035))
+             + self.__generator("uniform") * 5 + i for i in transformed_y]
+
+        x = [i * 135.0 / self.n + 1880 for i in range(self.n)]
         return x, y

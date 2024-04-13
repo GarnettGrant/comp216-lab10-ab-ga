@@ -10,18 +10,24 @@ from matplotlib.figure import Figure
 
 
 class DynamicGraph:
-    def __init__(self):
+    def __init__(self, xmin=0.0, xmax=200.0, samples=200):
+        self.xmin = xmin
+        self.xmax = xmax
+        self.samples = samples
+
         self.root = tkinter.Tk()
         self.root.wm_title("Water Levels Figure")
-        self.fig = Figure(figsize=(8, 4), dpi=100)
+        self.fig = Figure(figsize=(6, 5))
         self.plot = self.fig.add_subplot()
-        self.sensor = group_9_data_generator.DataGenerator(0.0, 200.0, 200)
+        self.sensor = group_9_data_generator.DataGenerator(xmin, xmax, samples)
         self.x, self.y = self.sensor.plot()
         self.length = len(self.y)
         self.i = 1 / self.length
         self.plot_graph()
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root, pack_toolbar=False)
         self.toolbar.update()
+
+        self.button_generate = tkinter.Button(master=self.root, text="Update", command=self.create_thread)
         self.button_quit = tkinter.Button(master=self.root, text="Quit", command=self.root.destroy)
         self.done = False
         self.pack_all()
@@ -34,25 +40,20 @@ class DynamicGraph:
         self.plot.set_xlabel('Time, in years')
         self.plot.set_ylabel('Rise in global sea levels, in millimeters')
         self.plot.set_title('Global rise in sea levels since 1880')
-        if (hasattr(self, "canvas")) == False:
+        if not hasattr(self, "canvas"):
             self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
         self.canvas.draw()
 
-    def update_plot(self):
+    def update_plot(self, new_y=0.0):
         while not self.done:
-            self.x.append(self.x[-1] + 1)
-
-            # the equation of our line is y = Ax^2 + Bx + C, but C and B are 0 so we only need y = ax^2.
-            # we know that we want when X is 135, Y = 200
-            # therefore:
-            # 200 = A(pow(135,2))
-            # 200/pow(135,2) = A
-            # 200/pow(135,2) = 0.01097393689986282578875171467764
-            # now that we have A, we can multiply it by any X value squared to get the accurate y position
-            new_y = 0.01097393689986282578875171467764 * pow(self.x[-1] - 1880,
-                                                             2)  # because we start at 1880, we subtract 1880 from x
+            # add the next x position, following the pattern from the data generator
+            # because we start at 1880, we subtract 1880 from x
+            self.x.append((len(self.x)+1) * (135.0/self.samples) + 1880)
             # add random noise to this new y position and then append to the list
-            self.y.append(new_y + (random.gauss(0, new_y / (self.x[-1] - 1880) * 2)) + random.uniform(0, 5))
+            new_y = (200 / pow(135, 2)) * pow(self.x[-1] - 1880, 2)
+            noise = abs(random.gauss(0, new_y * 0.035)) + random.uniform(0, 5)
+
+            self.y.append(new_y + noise)
             # self.x.pop(0)
             # self.y.pop(0)
             # line.set
@@ -63,16 +64,15 @@ class DynamicGraph:
             time.sleep(0.1)
 
     def create_thread(self):
-        if self.thread == None:
+        if self.thread is None:
             self.thread = threading.Thread(target=self.update_plot, daemon=True)
             self.thread.start()
 
     def pack_all(self):
-        self.button_generate = tkinter.Button(master=self.root, text="Update", command=self.create_thread)
         self.button_quit.pack(side=tkinter.BOTTOM)
         self.button_generate.pack(side=tkinter.BOTTOM)
         self.toolbar.pack(side=tkinter.BOTTOM, fill=tkinter.X)
         self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)
 
 
-graph = DynamicGraph()
+graph = DynamicGraph(0, 200, 200)
