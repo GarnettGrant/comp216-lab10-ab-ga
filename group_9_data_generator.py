@@ -20,7 +20,7 @@ class DataGenerator:
     plot: public method which handles the plotting of the graph
     '''
 
-    def __init__(self, xmin, xmax, n):
+    def __init__(self, xmin, xmax, samples):
 
         ## Lower Boundary
         '''
@@ -31,8 +31,8 @@ class DataGenerator:
         self.xmin = xmin
         ## Upper Boundary
         self.xmax = xmax
-        ## Number of values to generate
-        self.n = n
+        ## Number of samples
+        self.samples = samples
 
     ## Create a private method that will generate random values in range 0-1, this method may take an argument that can be passed by a property
     def __generator(self, method='uniform', arg=1.0):
@@ -45,7 +45,7 @@ class DataGenerator:
         if str(method).lower() == 'uniform':
             return random.uniform(0.0, arg)
         elif str(method).lower() == 'constant':
-            return [pow(i / self.n, 2) for i in range(self.n)]
+            return [pow(i / self.samples, 2) for i in range(self.samples)]
         elif str(method).lower() == 'gaussian':
             return random.gauss(0.0, arg)
         else:
@@ -72,7 +72,7 @@ class DataGenerator:
         y = [(m * x) + c for x in list_x] #
         return y
 
-    def plot(self):
+    def generate_line(self):
         '''
         This method will add noise to the transformed data, and then return the values needed to plot a graph.
 
@@ -86,6 +86,24 @@ class DataGenerator:
 
         y = [abs(self.__generator("gaussian", i * 0.035))
              + self.__generator("uniform") * 5 + i for i in transformed_y]
-
-        x = [i * 135.0 / self.n + 1880 for i in range(self.n)]
+        x = [i * 135.0 / self.samples + 1880 for i in range(self.samples)]
         return x, y
+
+    def get_next_pair(self, list_x:list):
+        '''
+        This method will take in the current x and y lists used to graph the data, and then append the next values needed
+
+        variables:
+        list_x: list of x values held by the generator, determines the numbers (years) on the x-axis
+        '''
+
+        # using the pattern from the _generate() method, we find the next x position
+        # To shift the x values from 0 to 1880 to match our reference graph, we add 1880 to the next x position
+        x = ((len(list_x)+1) * (135.0/self.samples) + 1880)
+        # add random noise to this new y position and then append to the list
+        new_y = (200 / pow(135, 2)) * pow(x - 1880, 2)
+        noise = abs(random.gauss(0, new_y * 0.035)) + random.uniform(0, 5)
+        y = new_y + noise
+
+        return x, y
+
