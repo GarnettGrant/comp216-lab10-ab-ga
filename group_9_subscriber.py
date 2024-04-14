@@ -57,7 +57,13 @@ class subscriber:
         self.client.loop_forever()
 
 
-sub = subscriber()
+import argparse
+parser = argparse.ArgumentParser(description='Subscriber Topic Selection')
+parser.add_argument("-topic", required=True, help='Select the topic you would like to listen to.')
+argslist = parser.parse_args()
+print(argslist.topic)
+
+sub = subscriber(argslist.topic)
 
 sub.graph.after(0, sub.block) #no different from just sub.block()
 

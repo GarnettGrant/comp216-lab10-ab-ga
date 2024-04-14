@@ -19,8 +19,10 @@ class publisher:
         self.list_y = []
         self.start_id = 0
 
-    def publish(self, times=1):
+    def publish(self):
+        # x is used for counting the item's number
         x = 1
+        #Continues looping forever
         while True:
             print(f'#{x}', end=' ')
             self.__publish()
@@ -73,7 +75,12 @@ class publisher:
 #    Again your subscriber should be able to handle this.
 #    • Anything that will add value to your project. You must make me aware of these.
 
+import argparse
+parser = argparse.ArgumentParser(description='Publisher Topic Selection')
+parser.add_argument("-topic", required=True, help='Select the topic you would like to publish in.')
+argslist = parser.parse_args()
+print(argslist.topic)
 
-pub = publisher()
+pub = publisher(0.05, argslist.topic)
 # Multiple messages are transmitted
 pub.publish()
