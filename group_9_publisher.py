@@ -7,7 +7,7 @@ import paho.mqtt.client as mqtt
 
 
 class publisher:
-    def __init__(self, delay=0.01, topic='LAB9'):
+    def __init__(self, delay=0.05, topic='LAB9'):
         ## Create a client
         self.client = mqtt.Client()
         self.topic = topic
@@ -16,6 +16,8 @@ class publisher:
         self.x_max = 200.0
         self.samples = 200.0
         self.list_x = []
+        self.list_y = []
+        self.start_id = 0
 
     def publish(self, times=1):
         x = 1
@@ -26,7 +28,7 @@ class publisher:
 
     def __publish(self):
         # Get value from generator as dictionary
-        dict_data, self.list_x = util.create_data(self.list_x, self.x_min, self.x_max, self.samples)
+        dict_data, self.list_x, self.start_id = util.create_data(self.list_x, self.x_min, self.x_max, self.samples, self.start_id)
         # Convert the dictionary to a JSON string
         data = json.dumps(dict_data)
         # Sleep
@@ -35,27 +37,41 @@ class publisher:
 
         # miss transmissions 1 in every 100 times, non-deterministically
         # check if a random number between 0 and 1 is  than 0.99, which has a 1% chance of happening.
-        miss_transmission = (random.uniform(0, 1)) > 0.99
-        if not miss_transmission:
-            corrupt_data: bool = (random.uniform(0, 1)) > 0.95
-            if corrupt_data:
-                # Connect to the server, publish the message, print a message, and disconnect
-                self.client.connect('localhost', 1883)
-                self.client.publish(self.topic, payload=data)
-                print(f"Published to {self.topic}")
-                sleep(self.delay)
-                # Close the connection
-                self.client.disconnect()
-                return
+        # miss_transmission = (random.uniform(0, 1)) > 0.99
+        # if not miss_transmission:
+        # Connect to the server
+        self.client.connect('localhost', 1883)
+        # dict_data =  json.loads(dict_data)
+        # If corrupt:
+        # if corrupt_data:
+        #     # Mutate (Fix) the data.
+        #
+        #
+        #
+        #     # Connect to the server, publish the message, print a message, and disconnect
+        #     self.client.publish(self.topic, payload=data)
+        #     print(f"Published to {self.topic}")
+        #     sleep(self.delay)
+        #     # Close the connection
+        #     self.client.disconnect()
+        #     return
 
-            # Connect to the server, publish the message, print a message, and disconnect
-            self.client.connect('localhost', 1883)
-            self.client.publish(self.topic, payload=data)
-            print(f"Published to {self.topic}")
-            sleep(self.delay)
-            # Close the connection
-            self.client.disconnect()
+        # Connect to the server, publish the message, print a message, and disconnect
+        self.client.connect('localhost', 1883)
+        self.client.publish(self.topic, payload=data)
+        print(f"Published to {self.topic}")
         sleep(self.delay)
+        # Close the connection
+        self.client.disconnect()
+        sleep(self.delay)
+
+
+#    Extra:
+#    • To simulate a real-world scenario, occasionally skip blocks of transmissions (or sets of transmission).
+#    This condition must not throw the subscriber into confusion.
+#    • Transmit “wild data” something that is completely off the chart.
+#    Again your subscriber should be able to handle this.
+#    • Anything that will add value to your project. You must make me aware of these.
 
 
 pub = publisher()
