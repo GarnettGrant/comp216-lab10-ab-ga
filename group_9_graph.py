@@ -43,33 +43,25 @@ class DynamicGraph(tkinter.Tk):
         self.update()
         self.update_idletasks()
 
-    def update_plot(self, new_x=0.0, new_y=0.0):
-        while not self.done:
-            x, y = self.sensor.get_next_pair(self.x)
-            print(x, y)
-            self.y.append(y)
-            self.x.append(x)
-            self.plot.clear()
-            self.plot_graph()
-            # redraw graph
-            self.canvas.draw()
-            return
-            # time.sleep(0.1)
-            # else:
-            #     x, y = self.sensor.get_next_pair(self.x)
-            #     print(x, y)
-            #     self.y.append(new_y)
-            #     self.x.append(new_x)
-            #     self.plot.clear()
-            #     self.plot_graph()
-            #     # redraw graph
-            #     self.canvas.draw()
-            #     time.sleep(0.1)
+    def update_plot(self, new_x, new_y):
+        # while not self.done:
+        #     x, y = self.sensor.get_next_pair(self.x)
+        # print(f"x: {round(x)}, y: {round(y)}")
+        print(f"new_x: {new_x}, new_y: {new_y}")
+        self.y.append(float(new_y))
+        self.x.append(float(new_x))
+        self.plot.clear()
+        self.plot_graph()
+        # redraw graph
+        self.canvas.draw()
 
 
-    def update_text(self, id="null", sea_level_pressure="null", temperature="null", year="null", global_mean_sea_level="null", time_stamp="null"):
+    def update_text(self, topic="null", id="null", sea_level_pressure="null", temperature="null", year="null", global_mean_sea_level="null", time_stamp="null"):
+        # Clear textbox text
         self.display_textbox.delete('1.0', tkinter.END)
-        self.display_textbox.insert(tkinter.INSERT, f"id: {id}\n"
+        # Insert all fields at once, separated by newlines "\n"
+        self.display_textbox.insert(tkinter.INSERT, f"Listening to topic: {topic}\n"
+                                    f"id: {id}\n"
                                     f"sea_level_pressure: {sea_level_pressure}\n"
                                     f"temperature: {temperature}\n"
                                     f"year: {year}\n"
