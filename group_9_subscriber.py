@@ -40,11 +40,19 @@ class subscriber:
         id = str(data["id"])
         sea_level_pressure = str(data["sea_level_pressure"])
         temperature = str(data["temperature"])
-        year = str(data["year"])
-        global_mean_sea_level = str(data["global_mean_sea_level"])
+        year = float(data["year"])
+        global_mean_sea_level = float(data["global_mean_sea_level"])
         time_stamp = str(data["time_stamp"])
 
-        # Spdate the graph
+        # Check for corrupt data (negative Y values):
+        if global_mean_sea_level < 0:
+            global_mean_sea_level *= -1 # Multiply by -1 to become positive
+
+        # Check for extraneous data (x values which already exist):
+        if year in client.graph.x:
+            return  # Do not plot this data. Ignore.
+
+        # Update the graph
         client.graph.update_plot(year, global_mean_sea_level)
         print(year, global_mean_sea_level)
         client.graph.update_text(client.topic, id, sea_level_pressure, temperature, year, global_mean_sea_level, time_stamp)
@@ -56,40 +64,52 @@ class subscriber:
         client.graph.update_idletasks()
 
     def block(self):
+        # This method tells the subscriber to loop forever
         self.client.loop_forever()
 
 class Gui(tkinter.Frame):
     def __init__(self):
         super().__init__()
+        # Set gui parameters
         self.master.title('Subscriber Topic Selector')
         self.pack(fill=BOTH, expand=1)
 
+        #Create gui widgets
         canvas = tkinter.Canvas(self, background="#eda031", name="content_canvas")
 
         canvas.pack(fill=BOTH, expand=1)
 
         button = tkinter.Button(canvas, text="BEGIN", command=self.listen, anchor=W, background='#eda031',
                             foreground='#272946')
+        quit = tkinter.Button(canvas, text="QUIT", command=self.master.destroy, anchor=W, background='#eda031',
+                              foreground='#272946')
         label = tkinter.Label(canvas, text="Start Listening:", background='#eda031', foreground='#272946',
                            font=('calibri', 12, 'bold'))
         label2 = tkinter.Label(canvas, text="Listen to which topic?:", background='#eda031', foreground='#272946',
                            font=('calibri', 12, 'bold'))
         entry = tkinter.Entry(canvas, foreground='#272946', name="topic", font=('calibri', 12, 'bold'))
-        text = tkinter.Text(master=self, height=7,foreground='#272946')
-        text.pack(side=tkinter.BOTTOM)
+
+        # Pack gui widgets
+
+        quit.pack(side=tkinter.BOTTOM)
         button.pack(side=tkinter.BOTTOM)
         label.pack(side=tkinter.BOTTOM)
-        label2.pack(side=tkinter.TOP)
-        entry.pack(side=tkinter.TOP)
+        entry.pack(side=tkinter.BOTTOM)
+        label2.pack(side=tkinter.BOTTOM)
 
     def listen(self):
+        # This method obtains the topic to listen to and then creates an instance of the subscriber, then sets
+        # blocking to true (subscriber will loop forever)
         topic = self.nametowidget("content_canvas.topic").get()
         sub = subscriber(topic)
-        sub.graph.after(0, sub.block)
+        sub.graph.after(0, sub.block) # same as sub.block(), no difference in execution
+        # start graph and loop
         sub.graph.mainloop()
 
+# Create instance of gui
 root = tkinter.Tk()
 gui = Gui()
+# Set gui dimensions and screen position
 root.geometry('400x250+550+300')
 gui.mainloop()
 

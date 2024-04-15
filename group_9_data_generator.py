@@ -99,6 +99,8 @@ class DataGenerator:
 
         # using the pattern from the _generate() method, we find the next x position
         # To shift the x values from 0 to 1880 to match our reference graph, we add 1880 to the next x position
+        # ax^2 = y
+        #
         x = ((len(list_x)+1) * (135.0/self.samples) + 1880)
         # add random noise to this new y position and then append to the list
         new_y = (200 / pow(135, 2)) * pow(x - 1880, 2)
